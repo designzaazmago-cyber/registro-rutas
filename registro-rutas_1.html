@@ -35,8 +35,9 @@ body.pickando{overflow:hidden}
 .bar{position:sticky;top:0;z-index:1000;background:linear-gradient(100deg,var(--acc),#FF8A33);
   color:#fff;padding:calc(12px + var(--safeT)) 16px 12px;display:flex;align-items:center;gap:12px;
   box-shadow:0 2px 12px rgba(255,102,0,.28)}
-.bar .logo{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.2);
-  display:grid;place-items:center;font-size:18px;flex:0 0 34px}
+.bar .logo{width:34px;height:34px;border-radius:99px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.18);
+  display:grid;place-items:center;flex:0 0 34px;overflow:hidden}
+.bar .logo img{width:26px;height:26px;display:block}
 .bar h1{font-size:16px;margin:0;font-weight:700}
 .bar .fec{font-size:11.5px;opacity:.9;text-transform:capitalize}
 .bar .reloj{margin-left:auto;text-align:right;font-variant-numeric:tabular-nums}
@@ -290,7 +291,7 @@ details.otros .cuerpo{padding-bottom:14px}
 <body>
 
 <header class="bar">
-  <div class="logo">🚗</div>
+  <div class="logo"><img src="./favicon.svg" alt="" width="26" height="26"></div>
   <div>
     <h1>Registro de Rutas</h1>
     <div class="fec" id="barFecha">—</div>
@@ -548,6 +549,9 @@ async function reverso(lat, lon){
 }
 const hhmm = d => String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
 const hm = min => Math.floor(min/60)+'h '+String(Math.round(min)%60).padStart(2,'0')+'m';
+/* min=null -> duración desconocida (odómetro/manual): 30 min de estimación.
+   min=número -> duración real (aunque sea 0, tramo muy corto): nunca se sustituye por 30, solo se pone un piso de 1 min. */
+const etaDesdeMin = min => Date.now() + (Number.isFinite(min) ? Math.max(min, 1) : 30) * 60000;
 function reloj(){
   const d = new Date();
   document.getElementById('barHora').textContent = hhmm(d);
@@ -1257,7 +1261,7 @@ function iniciarViaje(){
     const k = kmActual();
     if(!(k > 0)){ estado('err','Ingresa los kilómetros en Ajustes.'); return; }
     tramos = [{origen: document.getElementById('ac-orig').dataset.label, destino: ds[0].label,
-               km:k, min:0, motivo:ds[0].motivo, entidad:ds[0].entidad}];
+               km:k, min:null, motivo:ds[0].motivo, entidad:ds[0].entidad}];
   }
   const ahora = new Date();
   viaje = {
@@ -1265,7 +1269,7 @@ function iniciarViaje(){
     origen: document.getElementById('ac-orig').dataset.label,
     tramos, idx: 0, esperando: false,
     hsal: hhmm(ahora), t0: Date.now(),
-    eta: Date.now() + (tramos[0].min || 30)*60000,
+    eta: etaDesdeMin(tramos[0].min),
     metodo: {auto:'Automático (OpenStreetMap)', odo:'Odómetro', man:'Manual'}[met],
     notas: document.getElementById('notas').value.trim(), avisado:false
   };
@@ -1281,8 +1285,10 @@ function iniciarViaje(){
 function pintarViaje(){
   const c = document.getElementById('cardViaje');
   c.classList.toggle('hide', !viaje);
+  // con un viaje en curso el mapa/planificador se congela: no hay ruta nueva que elegir hasta terminarlo
+  document.getElementById('cardNueva').classList.toggle('hide', !!viaje);
   document.getElementById('barEstado').textContent = viaje ? 'viaje en curso' : 'listo';
-  if(!viaje){ pintarCTA(); return; }
+  if(!viaje){ if(map) setTimeout(()=>map.invalidateSize(), 60); pintarCTA(); return; }
   const t = tramoActual();
   document.getElementById('vPaso').textContent = 'Tramo '+(viaje.idx+1)+' de '+viaje.tramos.length;
   document.getElementById('vA').textContent = t.origen;
@@ -1307,7 +1313,7 @@ function salirAlSiguiente(){
   const ahora = new Date();
   viaje.esperando = false;
   viaje.hsal = hhmm(ahora); viaje.t0 = Date.now();
-  viaje.eta = Date.now() + (tramoActual().min || 30)*60000;
+  viaje.eta = etaDesdeMin(tramoActual().min);
   viaje.avisado = false;
   guardarTodo(); pintarViaje(); programarAlarma(); avisarSW('programar');
   estado('ok','Salida registrada a las '+viaje.hsal+' hacia '+tramoActual().destino.split(',')[0]+'.');
@@ -1327,7 +1333,7 @@ async function agregarDestinoEnRuta(){
     if(!res.length) throw new Error('No se encontró «'+dir+'».');
     const b = {lat:+res[0].lat, lon:+res[0].lon, label:corto(res[0].display_name)};
     const a = coordsCache[desde];
-    let km = null, min = 0;
+    let km = null, min = null;
     if(a){
       const r = await fetch(OSRM+a[1]+','+a[0]+';'+b.lon+','+b.lat+'?overview=false');
       const j = await r.json();
