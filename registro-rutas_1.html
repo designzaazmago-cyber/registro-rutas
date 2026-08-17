@@ -501,6 +501,7 @@ const LS = {rutas:'rr.rutas', viaje:'rr.viaje', zona:'rr.zona', fav:'rr.fav',
 const MOTIVOS = ['Reunión','Entrega de material','Recojo de material','Visita a cliente','Cobranza',
                  'Trámite','Instalación / soporte','Compra','Grabación / fotos','Otro'];
 let rutas = [], cargas = [], mants = [], viaje = null, cola = [], entidades = [];
+const SHEET_URL_DEFECTO = 'https://script.google.com/macros/s/AKfycbyIC3NHo15BYfpttAaUPpQeQ9mtjuPZZfR2zcf84ALnaCfqhFiqQLii2tKeaFT2Yqet/exec';
 let sheetUrl = '';
 
 const FAV_BASE = [
@@ -1553,8 +1554,9 @@ coordsCache = ls(LS.coords) || {};
 cola = ls(LS.cola) || [];
 entidades = ls(LS.ent) || [];
 viaje = ls(LS.viaje) || null;
-sheetUrl = ls(LS.sheet) || '';
+sheetUrl = ls(LS.sheet) || SHEET_URL_DEFECTO;
 document.getElementById('sheetUrl').value = sheetUrl;
+if(!ls(LS.sheet)) ls(LS.sheet, sheetUrl);   // primera vez en este dispositivo: queda guardada sin tener que pegarla
 const zG = ls(LS.zona);
 if(zG) document.getElementById('zona').value = zG;
 addDestino();
