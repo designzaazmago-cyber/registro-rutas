@@ -1,0 +1,31 @@
+{
+  "id": "registro-rutas-vehiculo",
+  "name": "Registro de Rutas",
+  "short_name": "Rutas",
+  "description": "Registro de rutas, kilometraje, combustible cada 150 km y mantenimiento cada 1500 km.",
+  "lang": "es-PE",
+  "dir": "ltr",
+  "start_url": "./registro-rutas_1.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#F6F7F9",
+  "theme_color": "#FF6600",
+  "categories": ["productivity", "travel"],
+  "icons": [
+    { "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Registrar llegada",
+      "short_name": "Llegada",
+      "url": "./registro-rutas_1.html?llegada=1",
+      "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
