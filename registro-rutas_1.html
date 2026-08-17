@@ -32,19 +32,19 @@ body{margin:0;background:var(--bg);color:var(--tx);
   padding-bottom:calc(96px + var(--safe))}
 body.pickando{overflow:hidden}
 
-.bar{position:sticky;top:0;z-index:1000;background:linear-gradient(100deg,var(--acc),#FF8A33);
-  color:#fff;padding:calc(12px + var(--safeT)) 16px 12px;display:flex;align-items:center;gap:12px;
-  box-shadow:0 2px 12px rgba(255,102,0,.28)}
-.bar .logo{width:34px;height:34px;border-radius:99px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.18);
-  display:grid;place-items:center;flex:0 0 34px;overflow:hidden}
-.bar .logo img{width:26px;height:26px;display:block}
-.bar h1{font-size:16px;margin:0;font-weight:700}
-.bar .fec{font-size:11.5px;opacity:.9;text-transform:capitalize}
-.bar .reloj{margin-left:auto;text-align:right;font-variant-numeric:tabular-nums}
-.bar .reloj b{font-size:19px;font-weight:700;display:block;line-height:1.1}
-.bar .reloj span{font-size:10.5px;opacity:.9}
-.bar .inst{background:#fff;color:var(--acc);font-size:12.5px;font-weight:700;padding:8px 12px;
-  border-radius:99px;min-height:auto;margin-left:6px}
+.icon{width:18px;height:18px;display:inline-block;vertical-align:-4px;fill:currentColor;flex:0 0 auto}
+.icon.sm{width:15px;height:15px;vertical-align:-3px}
+.icon.lg{width:24px;height:24px;vertical-align:-6px}
+
+.bar{position:sticky;top:0;z-index:1000;background:var(--card);color:var(--tx);
+  padding:calc(9px + var(--safeT)) 16px 9px;display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid var(--line)}
+.bar .logo{width:26px;height:26px;border-radius:99px;background:var(--accsoft);
+  display:grid;place-items:center;flex:0 0 26px;overflow:hidden}
+.bar .logo img{width:20px;height:20px;display:block}
+.bar h1{font-size:15px;margin:0;font-weight:700}
+.bar .inst{background:var(--acc);color:#fff;font-size:12px;font-weight:700;padding:7px 12px;
+  border-radius:99px;min-height:auto;margin-left:auto}
 
 .wrap{max-width:560px;margin:0 auto;padding:14px}
 .pills{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}
@@ -77,17 +77,9 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .note{font-size:12.5px;color:var(--tx2);margin-top:8px;line-height:1.45}
 .hide{display:none !important}
 
-.mapwrap{position:relative;height:270px;background:var(--line2)}
-.mapwrap.full{position:fixed;inset:0;height:auto;z-index:1800;background:#fff}
+.mapwrap{display:none}
+.mapwrap.full{display:block;position:fixed;inset:0;height:auto;z-index:1800;background:#fff}
 #map{position:absolute;inset:0}
-/* por encima de 800: los controles internos de Leaflet taparían estos overlays */
-.chipA{position:absolute;top:12px;left:12px;right:64px;z-index:900;background:rgba(27,31,38,.93);
-  color:#fff;border-radius:14px;padding:9px 12px;display:flex;align-items:center;gap:10px;
-  box-shadow:0 6px 20px rgba(0,0,0,.3);cursor:pointer;text-align:left;min-height:auto;font-weight:500}
-.chipA .tx{flex:1;min-width:0}
-.chipA .tx span{display:block;font-size:11px;opacity:.7}
-.chipA .tx b{display:block;font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.chipA .fl{font-size:17px;opacity:.7}
 .locbtn{position:absolute;bottom:14px;right:12px;z-index:900;width:46px;height:46px;border-radius:99px;
   background:#fff;color:var(--tx);border:0;box-shadow:0 4px 16px rgba(0,0,0,.22);font-size:19px;padding:0;
   display:grid;place-items:center}
@@ -146,6 +138,24 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .aclist .cab{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);
   font-weight:700;background:var(--line2);cursor:default;padding:7px 14px;display:block}
 .aclist .msg{color:var(--tx2);cursor:default;font-style:italic;display:block}
+.aclist .dist{flex:0 0 auto;font-size:12px;color:var(--tx2);font-variant-numeric:tabular-nums}
+
+/* ---- filas de parada, estilo apps de viaje: un toque abre el buscador de pantalla completa ---- */
+.stop{display:flex;align-items:center;gap:11px;width:100%;background:var(--line2);border:0;
+  border-radius:14px;padding:13px 12px;text-align:left;min-height:auto;color:var(--tx);font-weight:500}
+.stop:active{background:var(--accline)}
+.stop.falta{outline:2px solid var(--bad)}
+.stopDot{width:9px;height:9px;border-radius:99px;flex:0 0 9px}
+.dot-o{background:var(--ok)} .dot-d{background:var(--acc)} .dot-w{background:var(--warn)}
+.stopTx{flex:1;min-width:0}
+.stopLbl{display:block;font-size:11px;color:var(--tx2)}
+.stopTx b{display:block;font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--tx3)}
+.stop.set .stopTx b{color:var(--tx)}
+.stop .icon{color:var(--tx3)}
+.stopRow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.stopRow .stop{flex:1}
+.stopRow .qt{flex:0 0 40px;width:40px;height:46px;padding:0;min-height:46px;background:var(--line2);
+  border:0;border-radius:12px;color:var(--tx2)}
 
 /* ---- tarjeta de destino ---- */
 .dest{border:1.5px solid var(--line);border-radius:16px;padding:12px;margin-bottom:10px;background:#fff}
@@ -290,13 +300,30 @@ details.otros .cuerpo{padding-bottom:14px}
 </head>
 <body>
 
-<header class="bar">
-  <div class="logo"><img src="./favicon.svg" alt="" width="26" height="26"></div>
-  <div>
-    <h1>Registro de Rutas</h1>
-    <div class="fec" id="barFecha">—</div>
-  </div>
-  <div class="reloj"><b id="barHora">--:--</b><span id="barEstado">listo</span></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></symbol>
+<symbol id="i-flag" viewBox="0 0 24 24"><path d="M6 2v20h2v-8h9.5a1 1 0 0 0 .8-1.6L15.75 8l2.55-3.4A1 1 0 0 0 17.5 3H8V2z"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 20.6 7.4 19.2 6z"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="i-fuel" viewBox="0 0 24 24"><path d="M19.77 7.23l.01-.01-3.72-3.72L15 4.56l2.11 2.11c-.94.36-1.61 1.26-1.61 2.33 0 1.38 1.12 2.5 2.5 2.5.36 0 .69-.08 1-.21v7.21c0 .55-.45 1-1 1s-1-.45-1-1V14c0-1.1-.9-2-2-2h-1V5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v16h10v-7.5h1.5v5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V9c0-.69-.28-1.32-.73-1.77zM12 9H6V5h6v4z"/></symbol>
+<symbol id="i-wrench" viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><path d="M12 20a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm0-18a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm.5 5H11v6l5.2 3.2.8-1.3-4.5-2.7V7z"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4a2 2 0 0 0 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1z"/></symbol>
+<symbol id="i-target" viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm8.94 3A9 9 0 0 0 13 3.06V1h-2v2.06A9 9 0 0 0 3.06 11H1v2h2.06A9 9 0 0 0 11 20.94V23h2v-2.06A9 9 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></symbol>
+<symbol id="i-cloud" viewBox="0 0 24 24"><path d="M19.35 10.04A7.49 7.49 0 0 0 12 4a7.49 7.49 0 0 0-7.35 6.04A5.5 5.5 0 0 0 6 20h13a4.5 4.5 0 0 0 .35-9.96z"/></symbol>
+</defs>
+</svg>
+
+<header class="bar" id="barLogo">
+  <div class="logo"><img src="./favicon.svg" alt="" width="20" height="20"></div>
+  <h1>Registro de Rutas</h1>
+  <span id="barFecha" class="hide"></span><span id="barHora" class="hide"></span><span id="barEstado" class="hide"></span>
   <button class="inst hide" id="btnInstalar" onclick="instalar()">Instalar</button>
 </header>
 
@@ -305,8 +332,8 @@ details.otros .cuerpo{padding-bottom:14px}
   <div class="pills">
     <div class="pill"><i></i>Tramos <b id="k-rutas">0</b></div>
     <div class="pill"><i></i>Km totales <b id="k-km">0</b></div>
-    <div class="pill w"><i></i>⛽ <b id="k-f">0</b>/170</div>
-    <div class="pill r"><i></i>🔧 <b id="k-m">0</b>/1500</div>
+    <div class="pill w"><i></i><svg class="icon sm"><use href="#i-fuel"/></svg> <b id="k-f">0</b>/170</div>
+    <div class="pill r"><i></i><svg class="icon sm"><use href="#i-wrench"/></svg> <b id="k-m">0</b>/1500</div>
     <div class="pill g"><i></i>En la nube <b id="k-nube">0</b></div>
   </div>
 
@@ -328,9 +355,9 @@ details.otros .cuerpo{padding-bottom:14px}
       <div><span>Transcurrido</span><b id="vT">0:00</b></div>
       <div><span>Llegada est.</span><b id="vEta">—</b></div>
     </div>
-    <div class="nivel" id="nivelAlarma">Alarma de llegada: comprobando…</div>
+    <div class="nivel" id="nivelAlarma"></div>
     <div class="row" style="margin-top:10px">
-      <button class="sm" onclick="agregarDestinoEnRuta()">➕ Agregar destino</button>
+      <button class="sm" onclick="agregarDestinoEnRuta()"><svg class="icon sm"><use href="#i-plus"/></svg> Agregar destino</button>
       <button class="sm ghost" onclick="cancelarViaje()">Cancelar viaje</button>
     </div>
   </section>
@@ -338,46 +365,44 @@ details.otros .cuerpo{padding-bottom:14px}
   <section class="card p0" id="cardNueva">
     <div class="mapwrap" id="mapwrap">
       <div id="map"></div>
-      <button class="chipA" id="chipA" onclick="abrirPicker('orig')">
-        <div class="tx"><span>De dónde sales</span><b id="chipATx">Toca para elegir el origen</b></div>
-        <div class="fl">›</div>
-      </button>
-      <button class="locbtn" id="locbtn" onclick="centrarEnMi()" title="Mi ubicación">➤</button>
+      <button class="locbtn" id="locbtn" onclick="centrarEnMi()" title="Mi ubicación"><svg class="icon lg"><use href="#i-target"/></svg></button>
       <div class="cross" id="cross">
         <div class="cab" id="crossIc">A</div><div class="pal"></div><div class="sombra"></div>
       </div>
       <div class="pickhead">
-        <button class="back" onclick="cerrarPicker()">←</button>
+        <button class="back" onclick="cerrarPicker()"><svg class="icon"><use href="#i-back"/></svg></button>
         <div class="ac" style="flex:1" id="ac-pick">
-          <input id="pickInput" placeholder="Escribe la dirección…" autocomplete="off">
+          <input id="pickInput" placeholder="Buscar dirección" autocomplete="off">
           <div class="aclist"></div>
         </div>
       </div>
       <div class="pickfoot">
         <div class="dir">
-          <div class="ic" id="pickIc">📍</div>
+          <div class="ic" id="pickIc"><svg class="icon"><use href="#i-pin"/></svg></div>
           <div class="tx"><span id="pickRol">Origen</span><b id="pickDir">Mueve el mapa para elegir el punto</b></div>
         </div>
-        <button class="ok" id="pickBtn" onclick="confirmarPicker()">Confirmar este punto</button>
+        <button class="ok" id="pickBtn" onclick="confirmarPicker()">Confirmar</button>
       </div>
     </div>
 
     <div class="sheet">
-      <div id="destinos"></div>
-
-      <div class="row" style="margin-bottom:12px">
-        <button class="ghost sm" type="button" onclick="addDestino()">➕ Agregar otro destino</button>
-        <button class="ghost sm" type="button" onclick="guardarFav()">⭐ Guardar ruta</button>
-        <button class="ghost sm" type="button" onclick="limpiar()">Limpiar</button>
+      <div class="stopRow">
+        <button type="button" class="stop ac" id="ac-orig">
+          <span class="stopDot dot-o"></span>
+          <span class="stopTx"><span class="stopLbl">Origen</span><b>Toca para elegir</b></span>
+          <svg class="icon"><use href="#i-chev"/></svg>
+        </button>
       </div>
+      <div id="destinos"></div>
+      <button type="button" class="ghost sm" onclick="addDestino()" style="margin-bottom:12px">
+        <svg class="icon sm"><use href="#i-plus"/></svg> Agregar destino</button>
 
       <div class="favs" id="favs"></div>
 
       <div class="res">
         <div class="km"><span id="autoKmTx">—</span> <small>km</small></div>
         <div class="met">
-          <div>⏱ <b id="autoDur">—</b> estimado</div>
-          <div><span id="autoTramos">0</span> tramo(s) · OpenStreetMap</div>
+          <div><svg class="icon sm"><use href="#i-clock"/></svg> <b id="autoDur">—</b></div>
         </div>
         <div style="margin-left:auto;flex:0 0 auto">
           <select id="ida" onchange="planRuta(true)" style="min-width:118px;font-size:13.5px;padding:9px 10px;min-height:40px">
@@ -386,21 +411,25 @@ details.otros .cuerpo{padding-bottom:14px}
           </select>
         </div>
       </div>
-      <div class="note" id="autoMsg"><span class="dot"></span>Elige el destino: escribe, tócalo en la lista o marca en el mapa.</div>
+      <div class="note" id="autoMsg"></div>
+      <span id="autoTramos" class="hide">0</span>
 
-      <div class="ac hide" id="ac-orig"><input id="orig" autocomplete="off"><div class="aclist"></div></div>
+      <div class="row" style="margin-top:12px">
+        <button class="ghost sm" type="button" onclick="guardarFav()"><svg class="icon sm"><use href="#i-star"/></svg> Guardar ruta</button>
+        <button class="ghost sm" type="button" onclick="limpiar()"><svg class="icon sm"><use href="#i-x"/></svg> Limpiar</button>
+      </div>
 
-      <details class="otros" id="ajustes">
+      <details class="otros hide" id="ajustes">
         <summary>Ajustes</summary>
         <div class="cuerpo">
-          <label>📍 Ubicación del dispositivo</label>
+          <label>Ubicación del dispositivo</label>
           <div class="row">
             <button class="ghost sm" type="button" onclick="pedirUbicacion()">Activar mi ubicación</button>
             <span class="note" id="gpsEstado" style="margin:0;flex:1"></span>
           </div>
 
           <div style="margin-top:16px">
-            <label>📊 Google Sheets — registro en tiempo real</label>
+            <label>Google Sheets — registro en tiempo real</label>
             <input id="sheetUrl" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off">
             <div class="row" style="margin-top:9px">
               <button class="ghost sm" type="button" onclick="guardarSheet()">Guardar</button>
@@ -411,7 +440,7 @@ details.otros .cuerpo{padding-bottom:14px}
           </div>
 
           <div style="margin-top:16px">
-            <label>🏙 Ciudad donde manejas — ahí se buscan las direcciones</label>
+            <label>Ciudad donde manejas — ahí se buscan las direcciones</label>
             <input id="zona" list="ciudades" value="Huancayo, Junín, Perú">
             <datalist id="ciudades">
               <option>Huancayo, Junín, Perú</option>
@@ -435,7 +464,7 @@ details.otros .cuerpo{padding-bottom:14px}
           <div style="margin-top:16px">
             <label>Método de kilometraje</label>
             <select id="metodo" onchange="switchMetodo()">
-              <option value="auto">🗺 Automático (ruta por calles)</option>
+              <option value="auto">Automático (ruta por calles)</option>
               <option value="odo">Odómetro inicial / final</option>
               <option value="man">Distancia manual</option>
             </select>
@@ -450,30 +479,28 @@ details.otros .cuerpo{padding-bottom:14px}
           <div id="blk-man" class="hide" style="margin-top:12px">
             <label>Kilómetros recorridos</label><input type="number" step="0.1" id="manKm" placeholder="Ej. 42.5">
           </div>
-          <div style="margin-top:12px"><label>Notas del viaje</label><input id="notas" placeholder="Peaje, incidencias…"></div>
           <div class="note" id="pwaMsg" style="margin-top:14px"></div>
         </div>
       </details>
+      <div style="margin-top:12px"><input id="notas" placeholder="Nota del viaje (opcional)"></div>
     </div>
   </section>
 
   <section class="card">
-    <h2>📊 Contadores</h2>
+    <h2><svg class="icon sm"><use href="#i-fuel"/></svg> Contadores</h2>
     <div class="meter">
-      <div class="mhead"><span>⛽ Combustible <b id="f-val">0</b> / 170 km</span><span class="r" id="f-rest"></span></div>
+      <div class="mhead"><span>Combustible <b id="f-val">0</b> / 170 km</span><span class="r" id="f-rest"></span></div>
       <div class="bar2"><div class="fill" id="f-bar" style="width:0%;background:var(--ok)"></div></div>
     </div>
     <div class="meter">
-      <div class="mhead"><span>🔧 Mantenimiento <b id="m-val">0</b> / 1500 km</span><span class="r" id="m-rest"></span></div>
+      <div class="mhead"><span>Mantenimiento <b id="m-val">0</b> / 1500 km</span><span class="r" id="m-rest"></span></div>
       <div class="bar2"><div class="fill" id="m-bar" style="width:0%;background:var(--ok)"></div></div>
     </div>
-    <div class="note">Cada ciclo se reinicia solo al llegar al límite; el excedente pasa al siguiente.</div>
   </section>
 
   <section class="card">
-    <h2>🕘 Historial <span class="cnt" id="histCnt">0</span></h2>
+    <h2><svg class="icon sm"><use href="#i-clock"/></svg> Historial <span class="cnt" id="histCnt">0</span></h2>
     <div class="hist" id="hist"><div class="empty">Sin tramos registrados todavía.</div></div>
-    <div class="note">Cada tramo se envía a tu Google Sheet apenas registras la llegada. Aquí queda la copia del dispositivo.</div>
   </section>
 </div>
 
@@ -484,12 +511,12 @@ details.otros .cuerpo{padding-bottom:14px}
 
 <div class="velo" id="velo" onclick="masTarde()"></div>
 <div class="alarma" id="alarma">
-  <div class="ic">🔔</div>
+  <div class="ic"><svg class="icon lg"><use href="#i-bell"/></svg></div>
   <h3>¿Ya llegaste?</h3>
   <p id="alarmaTx">Marca tu llegada para registrar la hora de retorno.</p>
   <div class="row">
     <button class="ghost" onclick="masTarde()">Aún no</button>
-    <button onclick="registrarLlegada()" style="background:var(--ok)">✔ Registrar llegada</button>
+    <button onclick="registrarLlegada()" style="background:var(--ok)"><svg class="icon sm"><use href="#i-check"/></svg> Registrar llegada</button>
   </div>
 </div>
 
@@ -506,8 +533,8 @@ const SHEET_URL_DEFECTO = 'https://script.google.com/macros/s/AKfycbyIC3NHo15BYf
 let sheetUrl = '';
 
 const FAV_BASE = [
-  {a:'Jirón Julio C. Tello, Salcedo, Tucumachay', b:'Universidad Continental, 1980, Jirón San Jorge', ic:'🎓'},
-  {a:'Jirón Julio C. Tello, Salcedo, Tucumachay', b:'ISTP Continental, 125, Calle Real', ic:'🏫'}
+  {a:'Jirón Julio C. Tello, Salcedo, Tucumachay', b:'Universidad Continental, 1980, Jirón San Jorge'},
+  {a:'Jirón Julio C. Tello, Salcedo, Tucumachay', b:'ISTP Continental, 125, Calle Real'}
 ];
 let favUser = [], coordsCache = {};
 
@@ -672,7 +699,33 @@ function lugares(){
   return [...set].slice(0, 8);
 }
 
-/* ---------- autocompletado ---------- */
+/* ---------- fila de parada: un toque abre el buscador de pantalla completa ---------- */
+const R_TIERRA = 6371000;
+function distM(a, b){
+  const rad = x => x*Math.PI/180;
+  const dLat = rad(b[0]-a[0]), dLon = rad(b[1]-a[1]);
+  const h = Math.sin(dLat/2)**2 + Math.cos(rad(a[0]))*Math.cos(rad(b[0]))*Math.sin(dLon/2)**2;
+  return 2*R_TIERRA*Math.asin(Math.sqrt(h));
+}
+function fmtDist(m){ return m < 950 ? Math.round(m/10)*10+' m' : (m/1000).toFixed(1)+' km'; }
+
+function initStopRow(box){
+  const txt = box.querySelector('b');
+  const original = txt.textContent;
+  box._elegirCoord = (lat, lon, label) => {
+    txt.textContent = label; box.classList.add('set'); box.classList.remove('falta');
+    box.dataset.lat = lat; box.dataset.lon = lon; box.dataset.label = label;
+    pintarDestinos();
+  };
+  box._limpiar = () => {
+    txt.textContent = original; box.classList.remove('set');
+    delete box.dataset.lat; delete box.dataset.lon; delete box.dataset.label;
+  };
+  box.onclick = () => abrirPicker(box);
+}
+initStopRow(document.getElementById('ac-orig'));
+
+/* ---------- buscador dentro del selector de pantalla completa ---------- */
 function initAC(box, opts){
   opts = opts || {};
   const input = box.querySelector('input');
@@ -680,51 +733,43 @@ function initAC(box, opts){
   let timer = null, seq = 0, items = [], sel = -1;
   const cerrar = () => { list.classList.remove('open'); sel = -1; };
   const abrir  = h => { list.innerHTML = h; list.classList.add('open'); };
-  box._elegirCoord = (lat, lon, label) => {
-    input.value = label; box.classList.add('set'); input.classList.remove('falta');
-    box.dataset.lat = lat; box.dataset.lon = lon; box.dataset.label = label;
-    cerrar(); refrescarChip(); pintarDestinos();
-  };
-  box._limpiar = () => {
-    input.value = ''; box.classList.remove('set');
-    delete box.dataset.lat; delete box.dataset.lon; delete box.dataset.label;
-    cerrar(); refrescarChip();
-  };
+  function fila(txt, ic, i, dist){
+    return '<div data-i="'+i+'"><svg class="icon sm"><use href="#'+ic+'"/></svg><span class="tt"><b>'+
+      txt.split(',')[0]+'</b><small>'+txt.split(',').slice(1,4).join(',')+'</small></span>'+
+      (dist!=null ? '<span class="dist">'+fmtDist(dist)+'</span>' : '')+'</div>';
+  }
   function frecuentes(){
-    if(opts.volar) return;
     const l = lugares();
     if(!l.length) return;
-    abrir('<span class="cab">Lugares frecuentes</span>' + l.map(([t,ic])=>
-      '<div data-lugar="'+t.replace(/"/g,'&quot;')+'"><span class="pin">'+ic+'</span><span class="tt"><b>'+
-      t.split(',')[0]+'</b><small>'+t.split(',').slice(1).join(',')+'</small></span></div>').join(''));
+    const centro = pickCoord || (zonaCentro);
+    items = l.map(([t])=>({display_name:t, esLugar:true}));
+    abrir(l.map(([t,ic],i)=>{
+      const c = coordsCache[t];
+      const d = (centro && c) ? distM(centro, c) : null;
+      return fila(t, ic === '🕘' ? 'i-clock' : 'i-star', i, d);
+    }).join(''));
   }
   input.addEventListener('focus', ()=>{ if(!input.value.trim()) frecuentes(); });
   input.addEventListener('input', ()=>{
-    if(!opts.volar){
-      box.classList.remove('set');
-      delete box.dataset.lat; delete box.dataset.lon; delete box.dataset.label;
-    }
     const q = input.value.trim();
     clearTimeout(timer); seq++;
-    if(q.length < 3){ if(q) cerrar(); else frecuentes(); if(!opts.volar) planRuta(); return; }
-    abrir('<span class="msg">Buscando direcciones…</span>');
+    if(q.length < 3){ if(q) cerrar(); else frecuentes(); return; }
+    abrir('<span class="msg">Buscando…</span>');
     const mio = seq;
     timer = setTimeout(async ()=>{
       try{
         const res = await buscar(q);
         if(mio !== seq) return;
         items = res;
-        if(!res.length){ abrir('<span class="msg">Sin resultados en '+(zonaTxt||'el mapa')+'. Marca el punto en el mapa con 📌.</span>'); return; }
-        abrir(res.map((it,i)=>{
-          const p = it.display_name.split(',');
-          return '<div data-i="'+i+'"><span class="pin">📍</span><span class="tt"><b>'+(it.name || p[0])+
-                 '</b><small>'+p.slice(1,4).join(',')+'</small></span></div>';
-        }).join(''));
+        if(!res.length){ abrir('<span class="msg">Sin resultados</span>'); return; }
+        const centro = pickCoord;
+        abrir(res.map((it,i)=>fila(it.name || it.display_name, 'i-pin', i,
+          centro ? distM(centro, [+it.lat, +it.lon]) : null)).join(''));
       }catch(e){ if(mio === seq) abrir('<span class="msg">'+e.message+'</span>'); }
     }, 500);
   });
   input.addEventListener('keydown', e=>{
-    const op = [...list.querySelectorAll('div[data-i],div[data-lugar]')];
+    const op = [...list.querySelectorAll('div[data-i]')];
     if(e.key === 'Escape'){ cerrar(); return; }
     if(!op.length) return;
     if(e.key === 'ArrowDown' || e.key === 'ArrowUp'){
@@ -735,30 +780,25 @@ function initAC(box, opts){
     } else if(e.key === 'Enter'){ e.preventDefault(); op[sel < 0 ? 0 : sel].dispatchEvent(new MouseEvent('mousedown',{bubbles:true})); }
   });
   list.addEventListener('mousedown', async e=>{
-    const d = e.target.closest('div[data-i],div[data-lugar]');
+    const d = e.target.closest('div[data-i]');
     if(!d) return;
     e.preventDefault(); cerrar();
-    if(opts.volar){
-      const it = items[+d.dataset.i]; if(!it) return;
+    const it = items[+d.dataset.i]; if(!it) return;
+    if(it.esLugar){
+      const c = coordsCache[it.display_name];
+      if(c){ map.setView(c, 17); pickDir(corto(it.display_name)); }
+      else { await fijarTexto({_elegirCoord:(lat,lon,label)=>{ map.setView([lat,lon],17); pickDir(label); }}, it.display_name); }
       input.value = corto(it.display_name);
-      map.setView([+it.lat, +it.lon], 17);
-      pickDir(corto(it.display_name));
-      input.blur();
       return;
     }
-    if(d.dataset.lugar !== undefined){
-      estado('busy','Ubicando «'+d.dataset.lugar.split(',')[0]+'»…');
-      if(!await fijarTexto(box, d.dataset.lugar)){ estado('err','No se pudo ubicar ese lugar.'); return; }
-    } else {
-      const it = items[+d.dataset.i]; if(!it) return;
-      box._elegirCoord(it.lat, it.lon, corto(it.display_name));
-    }
-    planRuta(true);
+    input.value = corto(it.display_name);
+    map.setView([+it.lat, +it.lon], 17);
+    pickDir(corto(it.display_name));
+    input.blur();
   });
   input.addEventListener('blur', ()=> setTimeout(cerrar, 180));
   return box;
 }
-initAC(document.getElementById('ac-orig'));
 initAC(document.getElementById('ac-pick'), {volar:true});
 
 /* ---------- destinos (uno o varios, cada uno con motivo y entidad) ---------- */
@@ -772,11 +812,11 @@ function addDestino(foco){
   d.innerHTML =
     '<div class="cab"><div class="letra">'+letra(i)+'</div>'+
     '<div class="tit">Destino '+(i+1)+'</div><div class="km"></div>'+
-    (i > 0 ? '<button type="button" class="qt" title="Quitar">×</button>' : '')+'</div>'+
-    '<div class="busca ac" id="'+id+'"><span class="ic">🔍</span>'+
-    '<input placeholder="'+(i === 0 ? '¿A dónde vas?' : '¿Y después?')+'" autocomplete="off">'+
-    '<span class="chk">✓</span><button class="mp" type="button" title="Marcar en el mapa">📌</button>'+
-    '<div class="aclist"></div></div>'+
+    (i > 0 ? '<button type="button" class="qt" title="Quitar"><svg class="icon sm"><use href="#i-x"/></svg></button>' : '')+'</div>'+
+    '<button type="button" class="stop ac" id="'+id+'">'+
+      '<span class="stopDot dot-d"></span>'+
+      '<span class="stopTx"><span class="stopLbl">Destino</span><b>'+(i === 0 ? '¿A dónde vas?' : '¿Y después?')+'</b></span>'+
+      '<svg class="icon"><use href="#i-chev"/></svg></button>'+
     '<div class="campos">'+
       '<div><label>Motivo de la salida</label><select class="motivoSel">'+
         '<option value="">Elige el motivo…</option>'+
@@ -787,8 +827,7 @@ function addDestino(foco){
     '</div>';
   document.getElementById('destinos').appendChild(d);
   const box = d.querySelector('.ac');
-  initAC(box);
-  d.querySelector('.mp').onclick = ()=> abrirPicker(box);
+  initStopRow(box);
   const q = d.querySelector('.qt');
   if(q) q.onclick = ()=>{ d.remove(); pintarDestinos(); planRuta(true); };
   const sel = d.querySelector('.motivoSel'), otro = d.querySelector('.motivoOtro');
@@ -798,7 +837,7 @@ function addDestino(foco){
   };
   d.querySelector('.entidad').oninput = ()=>{ d.querySelector('.entidad').classList.remove('falta'); pintarCTA(); };
   otro.oninput = pintarCTA;
-  if(foco) box.querySelector('input').focus();
+  if(foco) box.click();
   pintarDestinos();
   return d;
 }
@@ -838,10 +877,10 @@ function faltantes(){
 }
 function marcarFaltantes(){
   const o = document.getElementById('ac-orig');
-  if(!o.dataset.lat) document.getElementById('chipA').style.outline = '3px solid var(--bad)';
+  o.classList.toggle('falta', !o.dataset.lat);
   tarjetas().forEach(d=>{
     const x = datosDestino(d);
-    d.querySelector('.ac input').classList.toggle('falta', !x.label);
+    d.querySelector('.ac').classList.toggle('falta', !x.label);
     d.querySelector('.motivoSel').classList.toggle('falta', !!x.label && !x.motivo);
     d.querySelector('.entidad').classList.toggle('falta', !!x.label && !x.entidad);
   });
@@ -891,9 +930,9 @@ function dibujar(pts, geo){
 /* ---------- selector estilo inDrive ---------- */
 let pickTarget = null, pickTimer = null, pickCoord = null;
 function rolDe(box){
-  if(box.id === 'ac-orig') return {rol:'Origen', ic:'🟢', letra:'A'};
+  if(box.id === 'ac-orig') return {rol:'Origen', ic:'i-pin', letra:'A'};
   const i = tarjetas().findIndex(d=>d.querySelector('.ac') === box);
-  return {rol:'Destino '+(i+1), ic:'🏁', letra: letra(Math.max(0,i))};
+  return {rol:'Destino '+(i+1), ic:'i-flag', letra: letra(Math.max(0,i))};
 }
 function abrirPicker(cual){
   if(!map){ estado('err','El mapa no cargó; revisa tu conexión.'); return; }
@@ -901,7 +940,7 @@ function abrirPicker(cual){
   pickTarget = box;
   const r = rolDe(box);
   document.getElementById('pickRol').textContent = r.rol;
-  document.getElementById('pickIc').textContent = r.ic;
+  document.getElementById('pickIc').innerHTML = '<svg class="icon"><use href="#'+r.ic+'"/></svg>';
   document.getElementById('crossIc').textContent = r.letra;
   document.getElementById('pickBtn').textContent = 'Confirmar '+r.rol.toLowerCase();
   document.getElementById('pickInput').value = '';
@@ -986,7 +1025,7 @@ function centrarEnMi(){
     navigator.geolocation.getCurrentPosition(p=>{
       ultimaPos = [p.coords.latitude, p.coords.longitude];
       map.setView(ultimaPos, 17); leerCentro();
-    }, e=>pickDir('No se pudo obtener tu ubicación: da el permiso desde Ajustes.'),
+    }, e=>pickDir('No se pudo obtener tu ubicación.'),
        {enableHighAccuracy:true, timeout:20000});
     return;
   }
@@ -994,15 +1033,14 @@ function centrarEnMi(){
 }
 function refrescarChip(){
   const b = document.getElementById('ac-orig');
-  document.getElementById('chipATx').textContent = b.dataset.label || 'Toca para elegir el origen';
-  if(b.dataset.label) document.getElementById('chipA').style.outline = '';
+  if(b.dataset.label) b.classList.remove('falta');
 }
 async function pintarAvisos(){
   const av = [];
   const st = await estadoGPS();
   const o = document.getElementById('ac-orig');
   if((st === 'prompt' || st === 'denied' || st === 'inseguro') && !o.dataset.lat){
-    av.push('<div class="aviso gps"><div class="ic">📍</div><div class="tx"><b class="t">Activa tu ubicación</b>'+
+    av.push('<div class="aviso gps"><div class="ic"><svg class="icon"><use href="#i-pin"/></svg></div><div class="tx"><b class="t">Activa tu ubicación</b>'+
       (st === 'inseguro' ? 'La app se abrió sin https, por eso el celular no pide el permiso. Publícala en un hosting https.'
        : st === 'denied' ? 'El permiso está bloqueado para este sitio: ábrelo en el candado 🔒 de la barra de direcciones → Ubicación → Permitir, y recarga.'
        : 'Así el origen se llena solo cuando vayas a salir.')+
@@ -1010,17 +1048,34 @@ async function pintarAvisos(){
       '</div></div>');
   }
   if(!sheetUrl){
-    av.push('<div class="aviso sheet"><div class="ic">📊</div><div class="tx"><b class="t">Falta conectar tu Google Sheet</b>'+
+    av.push('<div class="aviso sheet"><div class="ic"><svg class="icon"><use href="#i-cloud"/></svg></div><div class="tx"><b class="t">Falta conectar tu Google Sheet</b>'+
       'Los tramos se guardan en el dispositivo y se enviarán en cuanto pegues la URL en Ajustes.'+
       (cola.length ? ' Pendientes: '+cola.length+'.' : '')+
       '<br><button class="sm" onclick="abrirAjustes()">Configurar ahora</button></div></div>');
   } else if(cola.length){
-    av.push('<div class="aviso sheet"><div class="ic">☁️</div><div class="tx"><b class="t">'+cola.length+' tramo(s) sin subir</b>'+
+    av.push('<div class="aviso sheet"><div class="ic"><svg class="icon"><use href="#i-cloud"/></svg></div><div class="tx"><b class="t">'+cola.length+' tramo(s) sin subir</b>'+
       'Se reintenta solo al recuperar señal.<br><button class="sm" onclick="vaciarCola(true)">Reintentar ahora</button></div></div>');
   }
   document.getElementById('avisos').innerHTML = av.join('');
 }
+/* ---------- Ajustes: oculto para conductores, solo accesible a quien configura la app ---------- */
+let adminMode = ls('rr.admin') || false;
+function pintarAdmin(){
+  document.getElementById('ajustes').classList.toggle('hide', !adminMode);
+}
+function setAdmin(on){
+  adminMode = on; ls('rr.admin', on); pintarAdmin();
+}
+(function tapSecreto(){
+  let n = 0, t = null;
+  document.getElementById('barLogo').addEventListener('click', ()=>{
+    n++; clearTimeout(t); t = setTimeout(()=>{ n = 0; }, 1800);
+    if(n >= 5){ n = 0; setAdmin(!adminMode); estado(adminMode?'ok':'', adminMode ? 'Ajustes visibles.' : 'Ajustes ocultos de nuevo.'); }
+  });
+})();
+if(new URLSearchParams(location.search).get('config') === '1') setAdmin(true);
 function abrirAjustes(){
+  setAdmin(true);
   const a = document.getElementById('ajustes');
   a.open = true;
   a.scrollIntoView({behavior:'smooth', block:'center'});
@@ -1029,7 +1084,11 @@ function abrirAjustes(){
 
 /* ---------- ruta: un tramo por destino ---------- */
 let planTimer = null, planSeq = 0, tramosPlan = [], kmTotal = null, minTotal = null;
-const estado = (clase, texto) => document.getElementById('autoMsg').innerHTML = '<span class="dot '+(clase||'')+'"></span>'+texto;
+const estado = (clase, texto) => {
+  const el = document.getElementById('autoMsg');
+  el.classList.toggle('hide', !texto);
+  el.innerHTML = texto ? '<span class="dot '+(clase||'')+'"></span>'+texto : '';
+};
 function planRuta(inmediato){
   clearTimeout(planTimer);
   if(inmediato) plan(); else planTimer = setTimeout(plan, 400);
@@ -1046,13 +1105,12 @@ async function plan(){
   if(pts.length < 2){
     tramosPlan = []; kmTotal = minTotal = null; pintarResumen();
     dibujar(pts, null);
-    estado('', !o.dataset.lat ? 'Falta el origen: tócalo arriba en el mapa.'
-                              : 'Elige el destino: escribe, tócalo en la lista o marca en el mapa.');
+    estado('', '');
     return;
   }
   const conRetorno = +document.getElementById('ida').value === 2;
   const ruta = conRetorno ? [...pts, pts[0]] : pts;
-  estado('busy','Midiendo la ruta real por calles…');
+  estado('busy','Calculando…');
   dibujar(pts, null);
   try{
     const r = await fetch(OSRM+ruta.map(p=>p.lon+','+p.lat).join(';')+'?overview=full&geometries=geojson&alternatives=false');
@@ -1075,13 +1133,11 @@ async function plan(){
       d.querySelector('.km').textContent = t ? t.km.toFixed(1)+' km · '+t.min+' min' : '';
     });
     pintarResumen();
-    estado('ok', tramosPlan.length > 1
-      ? tramosPlan.length+' tramos listos. Completa motivo y entidad y pulsa «Iniciar viaje».'
-      : 'Distancia lista. Completa motivo y entidad y pulsa «Iniciar viaje».');
+    estado('ok', '');
   }catch(e){
     if(seq !== planSeq) return;
     tramosPlan = []; kmTotal = minTotal = null; pintarResumen();
-    estado('err', e.message+' Puedes usar odómetro o distancia manual en Ajustes.');
+    estado('err', e.message);
   }
 }
 function pintarResumen(){
@@ -1095,7 +1151,7 @@ function pintarResumen(){
 /* ---------- frecuentes ---------- */
 function todasFavs(){
   const l = FAV_BASE.map(f=>({...f}));
-  favUser.forEach(f=> l.push({...f, ic:'⭐'}));
+  favUser.forEach(f=> l.push({...f}));
   const vistas = new Set(l.map(f=>(f.a+'|'+f.b).toLowerCase()));
   const cuenta = {};
   rutas.forEach(r=>{
@@ -1106,7 +1162,7 @@ function todasFavs(){
   Object.entries(cuenta).sort((x,y)=>y[1]-x[1]).forEach(([k,n])=>{
     if(n < 2 || vistas.has(k.toLowerCase()) || l.length >= 6) return;
     const [a,b] = k.split('|');
-    l.push({a, b, ic:'🔁', veces:n});
+    l.push({a, b, veces:n});
   });
   return l;
 }
@@ -1117,9 +1173,9 @@ function kmConocido(f){
 function pintarFavs(){
   document.getElementById('favs').innerHTML = todasFavs().map((f,i)=>{
     const km = kmConocido(f);
-    return '<button class="fav" onclick="usarFav('+i+')"><div class="ic">'+f.ic+'</div>'+
+    return '<button class="fav" onclick="usarFav('+i+')"><div class="ic"><svg class="icon sm"><use href="#i-star"/></svg></div>'+
       '<div class="tx"><b>'+f.b.split(',')[0]+'</b><small>desde '+f.a.split(',')[0]+
-      (km ? ' · '+km : '')+(f.veces ? ' · '+f.veces+' viajes' : '')+'</small></div><div class="go">›</div></button>';
+      (km ? ' · '+km : '')+'</small></div><svg class="icon"><use href="#i-chev"/></svg></button>';
   }).join('');
 }
 async function usarFav(i){
@@ -1491,8 +1547,8 @@ function render(){
   h.innerHTML = !rutas.length ? '<div class="empty">Sin tramos registrados todavía.</div>'
     : [...rutas].reverse().slice(0,40).map(r=>
       '<div class="hrow"><div class="top"><b>'+r.km.toFixed(1)+' km</b>'+
-      (r.ev||[]).map(e=>e==='f'?'<span class="tag f">⛽ carga</span>':'<span class="tag m">🔧 mant.</span>').join(' ')+
-      (r.nube ? '<span class="tag nube">☁ en la hoja</span>' : '<span class="tag cola">pendiente</span>')+
+      (r.ev||[]).map(e=>e==='f'?'<span class="tag f">carga</span>':'<span class="tag m">mant.</span>').join(' ')+
+      (r.nube ? '<span class="tag nube">en la hoja</span>' : '<span class="tag cola">pendiente</span>')+
       '<span class="f">'+(r.fecha||'—')+'</span></div>'+
       '<div class="rt">'+r.origen+' → '+r.destino+'</div>'+
       '<div class="mo">'+(r.motivo||'—')+(r.entidad ? ' · '+r.entidad : '')+'</div>'+
@@ -1537,7 +1593,7 @@ function limpiar(all=true){
     if(o.dataset.lat) dibujar([{lat:+o.dataset.lat, lon:+o.dataset.lon, label:o.dataset.label}], null);
   }
   pintarResumen();
-  estado('','Elige el destino: escribe, tócalo en la lista o marca en el mapa.');
+  estado('','');
 }
 
 /* ---------- arranque ---------- */
@@ -1567,6 +1623,7 @@ const zG = ls(LS.zona);
 if(zG) document.getElementById('zona').value = zG;
 addDestino();
 pintarEntidades();
+pintarAdmin();
 aplicarZona(true);
 recalcular(); render(); pintarViaje(); refrescarChip();
 initPWA();
