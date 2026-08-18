@@ -1,17 +1,18 @@
 /* Service worker de Registro de Rutas
    - deja la app disponible sin señal
    - dispara la alarma de llegada aunque la app esté cerrada        */
-const V = 'rr-v3';
+const V = 'rr-v9';
 const APP = './registro-rutas_1.html';
 const SHELL = [
   './', APP, './manifest.webmanifest', './NOTIFICACION.mp3',
   './favicon.ico', './favicon.svg', './apple-touch-icon.png',
   './icon-192.png', './icon-512.png', './icon-maskable-512.png',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
-  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+  'https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap'
 ];
 // las direcciones, rutas, tiles y el envío a Google Sheets siempre van a la red
-const SIEMPRE_RED = /nominatim\.openstreetmap\.org|router\.project-osrm\.org|tile\.openstreetmap\.org|script\.google(usercontent)?\.com/;
+const SIEMPRE_RED = /nominatim\.openstreetmap\.org|router\.project-osrm\.org|tile\.openstreetmap\.org|basemaps\.cartocdn\.com|script\.google(usercontent)?\.com/;
 
 self.addEventListener('install', e => {
   e.waitUntil((async () => {
