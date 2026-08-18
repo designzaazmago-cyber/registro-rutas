@@ -410,7 +410,7 @@ details.otros .cuerpo{padding-bottom:14px}
     </div>
     <div class="nivel" id="nivelAlarma"></div>
     <div class="row" style="margin-top:10px">
-      <button class="sm" onclick="agregarDestinoEnRuta()"><svg class="icon sm"><use href="#i-plus"/></svg> Agregar destino</button>
+      <button class="sm" onclick="nuevoPuntoDesdeAgregar()"><svg class="icon sm"><use href="#i-plus"/></svg> Agregar destino</button>
       <button class="sm ghost" onclick="cancelarViaje()">Cancelar viaje</button>
     </div>
   </section>
@@ -511,6 +511,24 @@ details.otros .cuerpo{padding-bottom:14px}
             <label>Kilómetros recorridos</label><input type="number" step="0.1" id="manKm" placeholder="Ej. 42.5">
           </div>
           <div class="note" id="pwaMsg" style="margin-top:14px"></div>
+
+          <div style="margin-top:22px;padding-top:16px;border-top:1px solid var(--line)">
+            <label style="font-weight:700;color:var(--tx)">Administrador — kilometraje real del vehículo</label>
+            <div class="note" style="margin-top:2px">Para que Combustible y Mantenimiento cuenten desde el kilometraje real de hoy (y no desde cero) al momento de entregar la app.</div>
+            <div class="row" style="margin-top:9px">
+              <div style="flex:1"><label>Km desde la última carga</label><input type="number" step="0.1" id="admKmF" placeholder="0"></div>
+              <div style="flex:1"><label>Km desde el último mantenimiento</label><input type="number" step="0.1" id="admKmM" placeholder="0"></div>
+            </div>
+            <button class="ghost sm" type="button" onclick="guardarKmBase()" style="margin-top:9px">Guardar kilometraje actual</button>
+            <div class="note" id="admKmMsg"></div>
+          </div>
+
+          <div style="margin-top:22px;padding-top:16px;border-top:1px solid var(--line)">
+            <label style="font-weight:700;color:var(--bad)">Administrador — zona de riesgo</label>
+            <div class="note" style="margin-top:2px">Borra tramos de este dispositivo. Útil para limpiar datos de prueba antes de entregar la app. No borra lo ya enviado a Google Sheets (eso se limpia a mano en la hoja).</div>
+            <button class="ghost sm" type="button" onclick="borrarTodoHistorial()" style="margin-top:9px;color:var(--bad);border-color:var(--bad)">🗑 Borrar TODO el historial de este dispositivo</button>
+            <div class="note">Para borrar un tramo suelto, ábrelo en «Historial» más abajo: con el administrador activo aparece una ✕ en cada fila.</div>
+          </div>
         </div>
       </details>
       <div style="margin-top:12px"><input id="notas" placeholder="Nota del viaje (opcional)"></div>
@@ -551,6 +569,37 @@ details.otros .cuerpo{padding-bottom:14px}
   </div>
 </div>
 
+<div class="velo" id="velo2"></div>
+<div class="alarma" id="hojaDecision">
+  <div class="ic"><svg class="icon lg"><use href="#i-flag"/></svg></div>
+  <h3>Llegaste<span id="hdLugar"></span></h3>
+  <p>¿Qué sigue con el viaje?</p>
+  <div class="row" style="flex-direction:column;align-items:stretch">
+    <button onclick="elegirVolverOficina()"><svg class="icon sm"><use href="#i-pin"/></svg> Volver a la oficina</button>
+    <button class="ghost" onclick="nuevoPuntoDesdeDecision()"><svg class="icon sm"><use href="#i-plus"/></svg> Ir a otro punto</button>
+  </div>
+</div>
+
+<div class="alarma" id="hojaPunto">
+  <h3 id="hpTitulo">Nuevo punto</h3>
+  <div style="margin:14px 0 12px">
+    <label>Motivo de la salida</label>
+    <select id="hpMotivo" onchange="document.getElementById('hpMotivoOtro').classList.toggle('hide', this.value!=='Otro')">
+      <option value="">Elige el motivo…</option>
+    </select>
+    <input id="hpMotivoOtro" class="hide" placeholder="Escribe el motivo" style="margin-top:8px">
+  </div>
+  <div>
+    <label>Empresa / entidad / cliente</label>
+    <input id="hpEntidad" list="entidades" placeholder="¿A quién visitas?">
+  </div>
+  <p class="note" id="hpMsg" style="min-height:1em"></p>
+  <div class="row">
+    <button class="ghost" onclick="cancelarFormNuevoPunto()">Cancelar</button>
+    <button onclick="confirmarFormNuevoPunto()">Agregar destino</button>
+  </div>
+</div>
+
 <audio id="son" src="./NOTIFICACION.mp3" preload="auto"></audio>
 
 <script>
@@ -560,6 +609,7 @@ const LS = {rutas:'rr.rutas', viaje:'rr.viaje', zona:'rr.zona', fav:'rr.fav',
 const MOTIVOS = ['Reunión','Entrega de material','Recojo de material','Visita a cliente','Cobranza',
                  'Trámite','Instalación / soporte','Compra','Grabación / fotos','Otro'];
 let rutas = [], cargas = [], mants = [], viaje = null, cola = [], entidades = [];
+let kmBaseF = 0, kmBaseM = 0;   // kilometraje real del vehículo al momento de activar la app (lo carga el administrador)
 const SHEET_URL_DEFECTO = 'https://script.google.com/macros/s/AKfycbyIC3NHo15BYfpttAaUPpQeQ9mtjuPZZfR2zcf84ALnaCfqhFiqQLii2tKeaFT2Yqet/exec';
 let sheetUrl = '';
 
@@ -964,6 +1014,7 @@ function dibujar(pts, geo){
 let pickTarget = null, pickTimer = null, pickCoord = null;
 function rolDe(box){
   if(box.id === 'ac-orig') return {rol:'Origen', ic:'i-pin', letra:'A'};
+  if(box.esNuevo) return {rol:'nuevo destino', ic:'i-flag', letra:'+'};
   const i = tarjetas().findIndex(d=>d.querySelector('.ac') === box);
   return {rol:'Destino '+(i+1), ic:'i-flag', letra: letra(Math.max(0,i))};
 }
@@ -992,7 +1043,12 @@ function cerrarPicker(){
   pickTarget = null; pickCoord = null;
   document.getElementById('mapwrap').classList.remove('full');
   document.body.classList.remove('pickando');
-  setTimeout(()=>{ map.invalidateSize(); planRuta(true); }, 80);
+  const modo = modoNuevoPunto;
+  setTimeout(()=>{ map.invalidateSize(); if(!modo) planRuta(true); }, 80);
+  if(modo){
+    if(puntoNuevo) abrirFormNuevoPunto(puntoNuevo.label);
+    else { modoNuevoPunto = null; if(modo === 'decision') abrirDecision(); }
+  }
 }
 function pickDir(t){ document.getElementById('pickDir').textContent = t; }
 function leerCentro(){
@@ -1002,6 +1058,7 @@ function leerCentro(){
   pickDir('Leyendo la dirección…');
   pickTimer = setTimeout(async ()=>{
     const mio = pickCoord;
+    if(!mio) return;
     const t = await reverso(mio[0], mio[1]);
     if(pickTarget && pickCoord === mio) pickDir(t);
   }, 650);
@@ -1010,6 +1067,7 @@ function confirmarPicker(){
   if(!pickTarget || !pickCoord) return;
   const t = document.getElementById('pickDir').textContent;
   const label = (t && !/^(Leyendo|Mueve|Buscando)/.test(t)) ? t : pickCoord[0].toFixed(5)+', '+pickCoord[1].toFixed(5);
+  coordsCache[label] = [pickCoord[0], pickCoord[1]]; guardarTodo();
   pickTarget._elegirCoord(pickCoord[0], pickCoord[1], label);
   cerrarPicker();
 }
@@ -1097,7 +1155,30 @@ function pintarAdmin(){
   document.getElementById('ajustes').classList.toggle('hide', !adminMode);
 }
 function setAdmin(on){
-  adminMode = on; ls('rr.admin', on); pintarAdmin();
+  adminMode = on; ls('rr.admin', on); pintarAdmin(); render();
+}
+/* ---------- administrador: kilometraje real de arranque + borrado de historial ---------- */
+function guardarKmBase(){
+  kmBaseF = parseFloat(document.getElementById('admKmF').value) || 0;
+  kmBaseM = parseFloat(document.getElementById('admKmM').value) || 0;
+  ls('rr.kmBaseF', kmBaseF); ls('rr.kmBaseM', kmBaseM);
+  recalcular(); render();
+  document.getElementById('admKmMsg').textContent = 'Guardado. Combustible y mantenimiento cuentan desde ahí.';
+}
+function borrarTramo(id){
+  const r = rutas.find(x=>x.id===id);
+  if(!r) return;
+  if(!confirm('¿Borrar este tramo del historial?\n\n'+r.origen+' → '+r.destino+' ('+r.km.toFixed(1)+' km, '+(r.fecha||'—')+')\n\nEsto no se puede deshacer en este dispositivo.')) return;
+  rutas = rutas.filter(x=>x.id!==id);
+  guardarTodo(); recalcular(); render();
+  estado('ok','Tramo borrado del dispositivo.');
+}
+function borrarTodoHistorial(){
+  if(!rutas.length){ estado('','No hay historial que borrar.'); return; }
+  if(!confirm('¿Borrar TODOS los tramos del historial de este dispositivo? ('+rutas.length+' tramos)\n\nEsto no se puede deshacer, y tampoco borra lo que ya se envió a Google Sheets (esa hoja se limpia aparte, a mano).')) return;
+  rutas = []; cola = [];
+  guardarTodo(); recalcular(); render();
+  estado('ok','Historial borrado en este dispositivo. Los contadores siguen desde el kilometraje base que cargaste arriba.');
 }
 (function tapSecreto(){
   let n = 0, t = null;
@@ -1305,7 +1386,11 @@ const tramoActual = () => viaje ? viaje.tramos[viaje.idx] : null;
 function pintarCTA(){
   const btn = document.getElementById('ctaBtn'), km = document.getElementById('ctaKm'), tx = document.getElementById('ctaTx');
   if(viaje){
-    if(viaje.esperando){
+    if(viaje.decidiendo){
+      btn.textContent = '¿Qué sigue?'; btn.className = 'siguiente'; btn.disabled = false;
+      const t = tramoActual();
+      km.textContent = t ? t.km.toFixed(1) : '—'; tx.textContent = 'km · llegaste a '+(t ? t.destino.split(',')[0] : '');
+    } else if(viaje.esperando){
       btn.textContent = '▶ Salir al siguiente destino'; btn.className = 'siguiente'; btn.disabled = false;
       const t = tramoActual();
       km.textContent = t ? t.km.toFixed(1) : '—'; tx.textContent = 'km · a '+(t ? t.destino.split(',')[0] : '');
@@ -1325,6 +1410,7 @@ function pintarCTA(){
 }
 function ctaAccion(){
   if(!viaje) return iniciarViaje();
+  if(viaje.decidiendo) return abrirDecision();
   if(viaje.esperando) return salirAlSiguiente();
   registrarLlegada();
 }
@@ -1344,19 +1430,20 @@ function iniciarViaje(){
     tramos = tramosPlan.map((t,i)=>({
       origen: t.origen, destino: t.destino, km: t.km, min: t.min,
       motivo: t.retorno ? 'Retorno' : (ds[i] ? ds[i].motivo : ''),
-      entidad: t.retorno ? '—' : (ds[i] ? ds[i].entidad : '')
+      entidad: t.retorno ? '—' : (ds[i] ? ds[i].entidad : ''),
+      retorno: !!t.retorno
     }));
   } else {
     const k = kmActual();
     if(!(k > 0)){ estado('err','Ingresa los kilómetros en Ajustes.'); return; }
     tramos = [{origen: document.getElementById('ac-orig').dataset.label, destino: ds[0].label,
-               km:k, min:null, motivo:ds[0].motivo, entidad:ds[0].entidad}];
+               km:k, min:null, motivo:ds[0].motivo, entidad:ds[0].entidad, retorno:false}];
   }
   const ahora = new Date();
   viaje = {
     fecha: ahora.toISOString().slice(0,10),
     origen: document.getElementById('ac-orig').dataset.label,
-    tramos, idx: 0, esperando: false,
+    tramos, idx: 0, esperando: false, decidiendo: false,
     hsal: hhmm(ahora), t0: Date.now(),
     eta: etaDesdeMin(tramos[0].min),
     metodo: {auto:'Automático (OpenStreetMap)', odo:'Odómetro', man:'Manual'}[met],
@@ -1379,18 +1466,19 @@ function pintarViaje(){
   document.getElementById('barEstado').textContent = viaje ? 'viaje en curso' : 'listo';
   if(!viaje){ if(map) setTimeout(()=>map.invalidateSize(), 60); pintarCTA(); return; }
   const t = tramoActual();
-  document.getElementById('vPaso').textContent = 'Tramo '+(viaje.idx+1)+' de '+viaje.tramos.length;
+  document.getElementById('vPaso').textContent = viaje.decidiendo ? '¿Qué sigue?' : 'Tramo '+(viaje.idx+1)+' de '+viaje.tramos.length;
   document.getElementById('vA').textContent = t.origen;
   document.getElementById('vB').textContent = t.destino;
-  document.getElementById('vSal').textContent = viaje.esperando ? 'pendiente' : viaje.hsal;
+  document.getElementById('vSal').textContent = viaje.decidiendo ? 'llegaste' : (viaje.esperando ? 'pendiente' : viaje.hsal);
   document.getElementById('vKm').textContent = t.km.toFixed(1)+' km';
-  document.getElementById('vEta').textContent = viaje.esperando ? '—' : hhmm(new Date(viaje.eta));
-  document.getElementById('vMotivo').innerHTML =
-    '<b>Motivo:</b> <span>'+(t.motivo||'—')+'</span> · <b>Entidad:</b> <span>'+(t.entidad||'—')+'</span>';
+  document.getElementById('vEta').textContent = (viaje.decidiendo || viaje.esperando) ? '—' : hhmm(new Date(viaje.eta));
+  document.getElementById('vMotivo').innerHTML = viaje.decidiendo
+    ? '<b>Llegaste a:</b> <span>'+t.destino+'</span> — toca «¿Qué sigue?» abajo'
+    : '<b>Motivo:</b> <span>'+(t.motivo||'—')+'</span> · <b>Entidad:</b> <span>'+(t.entidad||'—')+'</span>';
   pintarNivel(); tick(); pintarCTA();
 }
 function tick(){
-  if(!viaje || viaje.esperando) return;
+  if(!viaje || viaje.esperando || viaje.decidiendo) return;
   const s = Math.floor((Date.now() - viaje.t0)/1000);
   document.getElementById('vT').textContent = Math.floor(s/3600)
     ? Math.floor(s/3600)+'h '+String(Math.floor(s/60)%60).padStart(2,'0')+'m'
@@ -1407,40 +1495,121 @@ function salirAlSiguiente(){
   guardarTodo(); pintarViaje(); programarAlarma(); avisarSW('programar');
   estado('ok','Salida registrada a las '+viaje.hsal+' hacia '+tramoActual().destino.split(',')[0]+'.');
 }
-async function agregarDestinoEnRuta(){
+/* ---------- decidir qué sigue al llegar: volver a oficina o sumar un punto ---------- */
+function abrirHoja(id, alTocarFondo){
+  document.getElementById(id).classList.add('open');
+  const v = document.getElementById('velo2');
+  v.classList.add('open'); v.onclick = alTocarFondo || (()=>cerrarHoja(id));
+}
+function cerrarHoja(id){
+  document.getElementById(id).classList.remove('open');
+  document.getElementById('velo2').classList.remove('open');
+}
+function abrirDecision(){
   if(!viaje) return;
-  const desde = tramoActual().destino;
-  const dir = prompt('¿A qué destino vas después?\n(Se buscará en '+(zonaTxt||'el mapa')+')');
-  if(!dir) return;
-  const motivo = prompt('Motivo de esa salida:');
-  if(!motivo) return;
-  const entidad = prompt('Empresa / entidad / cliente:');
-  if(!entidad) return;
-  estado('busy','Ubicando «'+dir+'» y midiendo el tramo…');
-  try{
-    const res = await buscar(dir.trim());
-    if(!res.length) throw new Error('No se encontró «'+dir+'».');
-    const b = {lat:+res[0].lat, lon:+res[0].lon, label:corto(res[0].display_name)};
-    const a = coordsCache[desde];
-    let km = null, min = null;
-    if(a){
-      const r = await fetch(OSRM+a[1]+','+a[0]+';'+b.lon+','+b.lat+'?overview=false');
+  document.getElementById('hdLugar').textContent = ' a '+tramoActual().destino.split(',')[0];
+  abrirHoja('hojaDecision', ()=>cerrarHoja('hojaDecision'));
+}
+async function elegirVolverOficina(){
+  if(!viaje) return;
+  cerrarHoja('hojaDecision');
+  const t = tramoActual(), desde = t.destino, hastaOrig = viaje.origen;
+  if(desde === hastaOrig){
+    viaje = null; guardarTodo(); render(); pintarViaje(); limpiar(false);
+    estado('ok','Viaje terminado.'); return;
+  }
+  estado('busy','Calculando el regreso a '+hastaOrig.split(',')[0]+'…');
+  const a = coordsCache[desde], b = coordsCache[hastaOrig];
+  let km = null, min = null;
+  if(a && b){
+    try{
+      const r = await fetch(OSRM+a[1]+','+a[0]+';'+b[1]+','+b[0]+'?overview=false');
       const j = await r.json();
-      if(String(j.code).toLowerCase() === 'ok'){
-        km = +(j.routes[0].distance/1000).toFixed(1);
-        min = Math.round(j.routes[0].duration/60);
-      }
-    }
-    if(km === null){
-      const t = prompt('No se pudo medir automáticamente. Escribe los km de ese tramo:');
-      km = parseFloat(t); if(!(km > 0)) throw new Error('Sin kilómetros no se puede agregar.');
-    }
-    coordsCache[b.label] = [b.lat, b.lon];
-    viaje.tramos.push({origen: desde, destino: b.label, km, min, motivo: motivo.trim(), entidad: entidad.trim()});
-    if(!entidades.includes(entidad.trim())) entidades.push(entidad.trim());
-    guardarTodo(); pintarEntidades(); pintarViaje();
-    estado('ok','Destino agregado: '+b.label.split(',')[0]+' ('+km.toFixed(1)+' km). Se activará al registrar la llegada actual.');
-  }catch(e){ estado('err', e.message); }
+      if(String(j.code).toLowerCase() === 'ok'){ km = +(j.routes[0].distance/1000).toFixed(1); min = Math.round(j.routes[0].duration/60); }
+    }catch(e){}
+  }
+  if(km === null){
+    const txt = prompt('No se pudo calcular el regreso automáticamente (falta la ubicación exacta de origen o destino). Escribe los km hasta la oficina:');
+    km = parseFloat(txt);
+    if(!(km > 0)){ estado('err','Sin kilómetros no se puede cerrar el regreso.'); abrirDecision(); return; }
+  }
+  viaje.tramos.push({origen:desde, destino:hastaOrig, km, min, motivo:'Retorno', entidad:'—', retorno:true});
+  viaje.idx++; viaje.esperando = true; viaje.avisado = false; viaje.decidiendo = false;
+  guardarTodo(); pintarViaje(); programarAlarma(); avisarSW('programar');
+  estado('ok','Regreso a la oficina agregado ('+km.toFixed(1)+' km). Toca «Salir al siguiente destino» cuando arranques.');
+}
+let modoNuevoPunto = null, puntoNuevo = null;
+function nuevoPuntoDesdeAgregar(){
+  if(!viaje) return;
+  modoNuevoPunto = 'agregar'; puntoNuevo = null;
+  abrirPickerNuevoPunto();
+}
+function nuevoPuntoDesdeDecision(){
+  modoNuevoPunto = 'decision'; puntoNuevo = null;
+  cerrarHoja('hojaDecision');
+  abrirPickerNuevoPunto();
+}
+function abrirPickerNuevoPunto(){
+  abrirPicker({dataset:{}, esNuevo:true, _elegirCoord:(lat,lon,label)=>{ puntoNuevo = {lat,lon,label}; }});
+}
+function abrirFormNuevoPunto(label){
+  document.getElementById('hpTitulo').textContent = 'Nuevo punto: '+label.split(',')[0];
+  const sel = document.getElementById('hpMotivo'), otro = document.getElementById('hpMotivoOtro');
+  sel.value = ''; sel.classList.remove('falta'); otro.value = ''; otro.classList.add('hide');
+  const ent = document.getElementById('hpEntidad'); ent.value = ''; ent.classList.remove('falta');
+  document.getElementById('hpMsg').textContent = '';
+  abrirHoja('hojaPunto', cancelarFormNuevoPunto);
+}
+function cancelarFormNuevoPunto(){
+  cerrarHoja('hojaPunto');
+  const modo = modoNuevoPunto; modoNuevoPunto = null; puntoNuevo = null;
+  if(modo === 'decision') abrirDecision();
+}
+async function agregarTramoAViaje(punto, motivo, entidad){
+  const desde = tramoActual().destino;
+  const a = coordsCache[desde];
+  let km = null, min = null;
+  document.getElementById('hpMsg').textContent = 'Calculando la ruta…';
+  if(a){
+    try{
+      const r = await fetch(OSRM+a[1]+','+a[0]+';'+punto.lon+','+punto.lat+'?overview=false');
+      const j = await r.json();
+      if(String(j.code).toLowerCase() === 'ok'){ km = +(j.routes[0].distance/1000).toFixed(1); min = Math.round(j.routes[0].duration/60); }
+    }catch(e){}
+  }
+  if(km === null){
+    const t = prompt('No se pudo medir automáticamente la distancia hasta ahí (falta la ubicación del punto anterior). Escribe los km de ese tramo:');
+    km = parseFloat(t);
+    if(!(km > 0)){ document.getElementById('hpMsg').textContent = 'Sin kilómetros no se puede agregar el destino.'; return false; }
+  }
+  coordsCache[punto.label] = [punto.lat, punto.lon]; guardarTodo();
+  viaje.tramos.push({origen: desde, destino: punto.label, km, min, motivo, entidad, retorno:false});
+  return true;
+}
+async function confirmarFormNuevoPunto(){
+  if(!viaje || !puntoNuevo) return;
+  const sel = document.getElementById('hpMotivo'), otro = document.getElementById('hpMotivoOtro');
+  const motivo = sel.value === 'Otro' ? otro.value.trim() : sel.value;
+  const entidad = document.getElementById('hpEntidad').value.trim();
+  if(!motivo || !entidad){
+    document.getElementById('hpMsg').textContent = 'Completa el motivo y la entidad.';
+    sel.classList.toggle('falta', !motivo);
+    document.getElementById('hpEntidad').classList.toggle('falta', !entidad);
+    return;
+  }
+  const ok = await agregarTramoAViaje(puntoNuevo, motivo, entidad);
+  if(!ok) return;
+  if(!entidades.includes(entidad)) entidades.push(entidad);
+  const modo = modoNuevoPunto; modoNuevoPunto = null; puntoNuevo = null;
+  cerrarHoja('hojaPunto'); pintarEntidades();
+  if(modo === 'decision'){
+    viaje.idx++; viaje.esperando = true; viaje.avisado = false; viaje.decidiendo = false;
+    guardarTodo(); pintarViaje(); programarAlarma(); avisarSW('programar');
+    estado('ok','Nuevo destino agregado. Toca «Salir al siguiente destino» cuando arranques.');
+  } else {
+    guardarTodo(); pintarViaje();
+    estado('ok','Destino agregado a la ruta. Se visitará después de los pendientes.');
+  }
 }
 function registrarLlegada(){
   if(!viaje || viaje.esperando) return;
@@ -1463,13 +1632,20 @@ function registrarLlegada(){
     notas:fila.notas});
   clearInterval(alarmaInt); avisarSW('cancelar');
   if(viaje.idx + 1 < viaje.tramos.length){
+    // ya había más tramos planificados de antemano (se agregaron antes de salir, o con "Agregar destino"): sigue igual que hoy
     viaje.idx++; viaje.esperando = true; viaje.avisado = false;
     guardarTodo(); render(); pintarViaje();
     estado('ok','Llegada a '+t.destino.split(',')[0]+' registrada ('+hret+'). Cuando salgas al siguiente destino, pulsa el botón.');
-  } else {
+  } else if(t.retorno){
+    // este tramo era justamente el regreso a la oficina: recién ahí termina el viaje
     viaje = null;
     guardarTodo(); render(); pintarViaje(); limpiar(false);
     estado('ok','Viaje terminado a las '+hret+'. Tramos guardados'+(sheetUrl ? ' y enviados a tu hoja.' : ' en el dispositivo.'));
+  } else {
+    // no queda nada planificado y no acaba de volver a la oficina: preguntar qué sigue
+    viaje.decidiendo = true;
+    guardarTodo(); render(); pintarViaje();
+    abrirDecision();
   }
 }
 function cancelarViaje(){
@@ -1491,15 +1667,15 @@ function sonar(){
 }
 function programarAlarma(){
   clearInterval(alarmaInt);
-  if(!viaje || viaje.esperando) return;
+  if(!viaje || viaje.esperando || viaje.decidiendo) return;
   alarmaInt = setInterval(()=>{
-    if(!viaje || viaje.esperando){ clearInterval(alarmaInt); return; }
+    if(!viaje || viaje.esperando || viaje.decidiendo){ clearInterval(alarmaInt); return; }
     if(Date.now() >= viaje.eta && !viaje.avisado) dispararAlarma();
   }, 20000);
   if(Date.now() >= viaje.eta && !viaje.avisado) dispararAlarma();
 }
 function dispararAlarma(){
-  if(!viaje || viaje.esperando) return;
+  if(!viaje || viaje.esperando || viaje.decidiendo) return;
   viaje.avisado = true; guardarTodo();
   const t = tramoActual();
   document.getElementById('alarmaTx').innerHTML =
@@ -1521,10 +1697,10 @@ function cerrarAlarma(){
 }
 function masTarde(){
   cerrarAlarma();
-  if(viaje && !viaje.esperando){ viaje.avisado = false; viaje.eta = Date.now() + 10*60000; guardarTodo(); pintarViaje(); avisarSW('programar'); }
+  if(viaje && !viaje.esperando && !viaje.decidiendo){ viaje.avisado = false; viaje.eta = Date.now() + 10*60000; guardarTodo(); pintarViaje(); avisarSW('programar'); }
 }
 document.addEventListener('visibilitychange', ()=>{
-  if(!document.hidden && viaje && !viaje.esperando && Date.now() >= viaje.eta) dispararAlarma();
+  if(!document.hidden && viaje && !viaje.esperando && !viaje.decidiendo && Date.now() >= viaje.eta) dispararAlarma();
 });
 
 /* ---------- métodos alternos ---------- */
@@ -1554,7 +1730,7 @@ function kmActual(){
 /* ---------- contadores e historial ---------- */
 function recalcular(){
   cargas = []; mants = [];
-  let acum=0, f=0, m=0;
+  let acum=0, f=kmBaseF, m=kmBaseM;
   rutas.forEach((r,i)=>{
     acum += r.km; f += r.km; m += r.km;
     r.acum = +acum.toFixed(1); r.ev = [];
@@ -1582,7 +1758,11 @@ function render(){
       '<div class="hrow"><div class="top"><b>'+r.km.toFixed(1)+' km</b>'+
       (r.ev||[]).map(e=>e==='f'?'<span class="tag f">carga</span>':'<span class="tag m">mant.</span>').join(' ')+
       (r.nube ? '<span class="tag nube">en la hoja</span>' : '<span class="tag cola">pendiente</span>')+
-      '<span class="f">'+(r.fecha||'—')+'</span></div>'+
+      '<span class="f">'+(r.fecha||'—')+'</span>'+
+      (adminMode ? '<button type="button" onclick="borrarTramo(\''+r.id+'\')" title="Borrar tramo" '+
+        'style="margin-left:8px;flex:0 0 auto;background:var(--badsoft);color:var(--bad);border:1px solid var(--accline);'+
+        'border-radius:8px;width:26px;height:26px;min-height:26px;padding:0;font-size:13px;line-height:1">✕</button>' : '')+
+      '</div>'+
       '<div class="rt">'+r.origen+' → '+r.destino+'</div>'+
       '<div class="mo">'+(r.motivo||'—')+(r.entidad ? ' · '+r.entidad : '')+'</div>'+
       '<div class="mt"><span>🕐 '+(r.hsal||'—')+' → '+(r.hret||'—')+'</span><span>⏱ '+dur(r.hsal,r.hret)+
@@ -1656,13 +1836,17 @@ const zG = ls(LS.zona);
 if(zG) document.getElementById('zona').value = zG;
 addDestino();
 pintarEntidades();
+document.getElementById('hpMotivo').insertAdjacentHTML('beforeend', MOTIVOS.map(m=>'<option>'+m+'</option>').join(''));
+kmBaseF = ls('rr.kmBaseF') || 0; kmBaseM = ls('rr.kmBaseM') || 0;
+document.getElementById('admKmF').value = kmBaseF || '';
+document.getElementById('admKmM').value = kmBaseM || '';
 pintarAdmin();
 aplicarZona(true);
 recalcular(); render(); pintarViaje(); refrescarChip();
 initPWA();
 vaciarCola();
 if(viaje){
-  programarAlarma();
+  if(viaje.decidiendo) abrirDecision(); else programarAlarma();
   estado('','Tienes un viaje en curso.');
   if(new URLSearchParams(location.search).get('llegada')) dispararAlarma();
 } else {
